@@ -30,7 +30,17 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 
     //.list-card to get all the property cards
     const cards = await page.$$('.list-card');
-    console.log(cards[0]);
+    //console.log(cards[0]);
+
+    //potentially randomize order
+    //or just add a wait
+    for(let i = 0; i < cards.length; i++){
+        await cards[i].click();
+        await page.waitForNavigation({waitUntil: 'networkidle0'});
+        await page.waitFor(3000);
+        break;
+    }
+
 
     
     await browser.close()
