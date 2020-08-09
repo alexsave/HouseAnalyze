@@ -1,6 +1,7 @@
 import numpy as np
 import json
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 
 #first step is rent model
 
@@ -39,4 +40,10 @@ print(reg.score(X, Y))
 print(reg.coef_)
 print(reg.intercept_)
 
+
+plt.plot(Y)
+
+#plt.plot(Y)
+plt.plot(reg.predict(X))
+plt.show()
 #models look for x: [[area, baths, beds],] and y: [price,]
