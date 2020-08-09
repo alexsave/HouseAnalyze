@@ -21,21 +21,20 @@ puppeteer.use(StealthPlugin())
 
 const city = 'dover-nh';
 
-let store = {};
-
-store.time = new Date().getTime();
-store.properties = [];
-
-
-let baseURL;
-
 //yes it's a global obj
 let page;
 let _b;
 
+let modes = ['sale', 'rent', 'sold'];
+let m;
+
 //much easier way to do it potentially
+
 //use the browser to directly load urls rather than clicking and stuff
-const loadPages = async (page) => {
+const loadProperties = async (page, baseURL) => {
+    let store = {};
+    store.time = new Date().getTime();
+    store.properties = [];
 
     baseURL = decodeURIComponent(baseURL);
 
@@ -72,27 +71,31 @@ const loadPages = async (page) => {
         //pageNum++;
     } 
 
-    fs.writeFileSync('./data.json', JSON.stringify(store));
-    await _b.close();
+    fs.writeFileSync(`${mode}.json`, JSON.stringify(store));
+    //await _b.close();
+    
+    //next mode
+    loadPage();
     
 }
 
 const resHandler = async res => {
     if(res.url().startsWith('https://www.zillow.com/search/')){
         baseURL = res.url()
-        loadPages(page);
+        loadProperties(page, baseURL);
         page.off('response', resHandler);
         
     }
 }
 
-// puppeteer usage as normal
-puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximized']}).then(async browser => {
-    _b = browser;
-    page = await browser.newPage();
-    await page.setViewport({width: 1920, height: 1080});
 
-    await page.goto(`https://www.zillow.com/${city}/sold/`, {waitUntil: 'networkidle0'});
+const loadPage = async () => {
+    //lets see what we're loading
+    if(modes.length === 0)
+        _b.close();
+
+    mode = modes.shift();
+    await page.goto(`https://www.zillow.com/${city}/${mode}/`, {waitUntil: 'networkidle0'});
 
     //problem with zillow is that they don't show more than 500 addresses
     //so let's sort by newest
@@ -108,8 +111,16 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 
     //the last click will change the url, so this works
     await page.reload({waitUntil: 'networkidle0'});
+}
 
-    //baseURL = await page.url();
-    //await browser.close();
-    
+
+//fuck it, just load everything without checking stored
+
+// puppeteer usage as normal
+puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximized']}).then(async browser => {
+    _b = browser;
+    page = await browser.newPage();
+    await page.setViewport({width: 1920, height: 1080});
+
+    loadPage();
 });
