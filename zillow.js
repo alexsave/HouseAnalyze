@@ -67,6 +67,7 @@ const loadProperties = async (page, baseURL) => {
 
         //console.log(list[0].address);
         
+        //check for null ids potentially
         for(let i = 0; i < list.length; i++){
             //if there's a duplicate id, get out of there
             if(ids.has(list[i].id)){
