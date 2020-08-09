@@ -48,7 +48,7 @@ const loadPages = async (page) => {
     baseURL = baseURL.replace('"pagination":{}', `"pagination":{"currentPage":${pageNum}}`);
 
     while(pageNum <= 20){ 
-        console.log(baseURL);
+        //console.log(baseURL);
         //better to do it in browser, https fetch is unreliable
         await page.goto(baseURL, {waitUntil: 'networkidle0'});
         //await page.waitFor(5000);
@@ -61,7 +61,7 @@ const loadPages = async (page) => {
         const obj = JSON.parse(raw);
         const list = obj.searchResults.listResults;
 
-        console.log(list[0].address);
+        //console.log(list[0].address);
         
         for(let i = 0; i < list.length; i++)
             store.properties.push({...list[i]});
