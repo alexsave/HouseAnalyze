@@ -14,7 +14,7 @@
 const puppeteer = require('puppeteer-extra')
 
 // add stealth plugin and use defaults (all evasion techniques)
-    const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(StealthPlugin())
 
 const city = 'dover-nh';
@@ -26,6 +26,8 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 
     await page.goto(`https://www.zillow.com/${city}/sold/`, {waitUntil: 'networkidle0'});
 
+    //problem with zillow is that they don't show more than 500 addresses
+    //so let's sort by newest
     //sort by new
     await page.click('.filter-button');
     await page.waitFor(500);//just to be safe
@@ -52,18 +54,39 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
         }
     });
 
-    //potentially randomize order
-    //or just add a wait
-    /*for(let i = 0; i < cards.length; i++){
-        await cards[i].click();
+
+    let nextPage = false;
+    
+    while(true){
+        
+        //get all cards on the page
+    
+        //potentially randomize order
+        //or just add a wait
+        /*for(let i = 0; i < cards.length; i++){
+            await cards[i].click();
+            await page.waitForNavigation({waitUntil: 'networkidle0'});
+            await page.waitFor(3000);
+            break;
+        }*/
+        
+        //if it's not empty, then there's nothing left
+        //if it's [], then there's more
+        const nextBut = await page.$('a[disabled][title="Next page"]');
+
+        console.log(nextBut);
+
+        nextPage = nextBut !== [];
+
+        if(!nextPage)
+            break;
+
+        await page.waitFor(1000);
+        await page.click('a[title="Next page"]');
         await page.waitForNavigation({waitUntil: 'networkidle0'});
-        await page.waitFor(3000);
-        break;
-    }*/
 
-    //problem with zillow is that they don't show more than 500 addresses
-    //so let's sort by newest
 
+    }
 
     
     await browser.close()
