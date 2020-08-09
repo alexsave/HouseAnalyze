@@ -43,9 +43,6 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
     await page.reload({waitUntil: 'networkidle0'});
     
 
-    //.list-card to get all the property cards
-    const cards = await page.$$('.list-card');
-    //console.log(cards[0]);
 
     //next part just clicks through, 
     //this is what actually saves stuff. 
@@ -67,6 +64,9 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
     while(true){
         
         //get all cards on the page
+        //.list-card to get all the property cards
+        const cards = await page.$$('.list-card');
+        //console.log(cards[0]);
     
         //potentially randomize order
         //or just add a wait
@@ -88,7 +88,9 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
             break;
 
         await page.waitFor(1000);
+        console.log('error right after this');
         await page.click('a[title="Next page"]');
+        console.log('error right before this');
         await page.waitForNavigation({waitUntil: 'networkidle0'});
 
 
