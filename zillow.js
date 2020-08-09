@@ -74,7 +74,6 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
             await cards[i].click();
             await page.waitForNavigation({waitUntil: 'networkidle0'});
             await page.waitFor(1000);
-            break;
         }
         
         //if it's not empty, then there's nothing left
