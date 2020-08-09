@@ -12,12 +12,18 @@
 
 
 const puppeteer = require('puppeteer-extra')
+const fs = require('fs');
 
 // add stealth plugin and use defaults (all evasion techniques)
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(StealthPlugin())
 
 const city = 'dover-nh';
+
+let store = {};
+
+store.time = new Date().getTime();
+store.properties = [];
 
 // puppeteer usage as normal
 puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximized']}).then(async browser => {
@@ -50,6 +56,7 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
             const json = await res.json();
             //this right here has a good amount of data
             //console.log(json.data.property);
+            store.properties.push({...json.data.property});
         
         }
     });
@@ -63,12 +70,12 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
     
         //potentially randomize order
         //or just add a wait
-        /*for(let i = 0; i < cards.length; i++){
+        for(let i = 0; i < cards.length; i++){
             await cards[i].click();
             await page.waitForNavigation({waitUntil: 'networkidle0'});
-            await page.waitFor(3000);
+            await page.waitFor(1000);
             break;
-        }*/
+        }
         
         //if it's not empty, then there's nothing left
         //if it's [], then there's more
@@ -90,6 +97,8 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 
     
     await browser.close()
+
+    fs.writeFileSync('./data.json', JSON.stringify(store));
 })
 
 
