@@ -25,7 +25,15 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
     await page.setViewport({width: 1920, height: 1080});
 
     await page.goto(`https://www.zillow.com/${city}/sold/`, {waitUntil: 'networkidle0'});
-    await page.waitFor(5000)
+
+    //sort by new
+    await page.click('.filter-button');
+    await page.waitFor(500);//just to be safe
+    await page.click('a[data-value="days"]');
+    await page.waitFor(500);
+    //the last click will change the url, so this works
+    await page.reload({waitUntil: 'networkidle0'});
+    
 
     //.list-card to get all the property cards
     const cards = await page.$$('.list-card');
@@ -46,12 +54,15 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
 
     //potentially randomize order
     //or just add a wait
-    for(let i = 0; i < cards.length; i++){
+    /*for(let i = 0; i < cards.length; i++){
         await cards[i].click();
         await page.waitForNavigation({waitUntil: 'networkidle0'});
         await page.waitFor(3000);
         break;
-    }
+    }*/
+
+    //problem with zillow is that they don't show more than 500 addresses
+    //so let's sort by newest
 
 
     
