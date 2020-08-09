@@ -45,8 +45,13 @@ const loadProperties = async (page, baseURL) => {
 
     let pageNum = 1;
     baseURL = baseURL.replace('"pagination":{}', `"pagination":{"currentPage":${pageNum}}`);
+    
+    let ids = new Set();
+    let valid = true;
 
-    while(pageNum <= 20){ 
+    //just keep going up until it stops?
+    //better idea: check ids
+    while(valid){
         //console.log(baseURL);
         //better to do it in browser, https fetch is unreliable
         await page.goto(baseURL, {waitUntil: 'networkidle0'});
@@ -62,8 +67,16 @@ const loadProperties = async (page, baseURL) => {
 
         //console.log(list[0].address);
         
-        for(let i = 0; i < list.length; i++)
+        for(let i = 0; i < list.length; i++){
+            //if there's a duplicate id, get out of there
+            if(ids.has(list[i].id)){
+                valid = false;
+                break;
+            }
+
+            ids.add(list[i].id);
             store.properties.push({...list[i]});
+        }   
 
         //now do it again for the rest of the 20 pages
         //increment pagenumber and update the url
