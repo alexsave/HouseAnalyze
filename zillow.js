@@ -80,18 +80,18 @@ puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximi
         //if it's [], then there's more
         const nextBut = await page.$('a[disabled][title="Next page"]');
 
-        console.log(nextBut);
 
         nextPage = nextBut !== [];
 
         if(!nextPage)
             break;
 
-        await page.waitFor(1000);
-        console.log('error right after this');
+        await page.waitFor(10000);
+        await page.keyboard.press('Escape');
         await page.click('a[title="Next page"]');
-        console.log('error right before this');
         await page.waitForNavigation({waitUntil: 'networkidle0'});
+
+            
 
 
     }
