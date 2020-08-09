@@ -31,38 +31,50 @@ let baseURL;
 
 //yes it's a global obj
 let page;
+let _b;
 
 //much easier way to do it potentially
 //use the browser to directly load urls rather than clicking and stuff
 const loadPages = async (page) => {
+
+    baseURL = decodeURIComponent(baseURL);
 
     //you can't win, zillow
     baseURL = baseURL.replace('includeList=false', 'includeList=true');
     if(baseURL.includes("&wants="))
         baseURL = baseURL.substring(0, baseURL.lastIndexOf("&wants=") + 1);
 
-    console.log(baseURL);
+    let pageNum = 1;
+    baseURL = baseURL.replace('"pagination":{}', `"pagination":{"currentPage":${pageNum}}`);
 
-    
-    //better to do it in browser, https fetch is unreliable
-    await page.goto(baseURL, {waitUntil: 'networkidle0'});
-    //await page.waitFor(5000);
+    while(pageNum <= 20){ 
+        console.log(baseURL);
+        //better to do it in browser, https fetch is unreliable
+        await page.goto(baseURL, {waitUntil: 'networkidle0'});
+        //await page.waitFor(5000);
 
-    //now we parse
-    const elem = await page.$('pre');
-    const raw = await (await elem.getProperty('textContent')).jsonValue();
-    console.log(raw);
+        //now we parse
+        const elem = await page.$('pre');
+        const raw = await (await elem.getProperty('textContent')).jsonValue();
+        //console.log(raw);
 
-    const obj = JSON.parse(raw);
-    const list = obj.searchResults.listResults;
-    
-    for(let i = 0; i < list.length; i++)
-        store.properties.push({...list[i]});
+        const obj = JSON.parse(raw);
+        const list = obj.searchResults.listResults;
 
-    //now do it again for the rest of the 20 pages
+        console.log(list[0].address);
+        
+        for(let i = 0; i < list.length; i++)
+            store.properties.push({...list[i]});
+
+        //now do it again for the rest of the 20 pages
+        //increment pagenumber and update the url
+        baseURL = baseURL.replace(`"pagination":{"currentPage":${pageNum}}`, `"pagination":{"currentPage":${++pageNum}}`);
+        //pageNum++;
+    } 
 
     fs.writeFileSync('./data.json', JSON.stringify(store));
-
+    await _b.close();
+    
 }
 
 const resHandler = async res => {
@@ -70,11 +82,13 @@ const resHandler = async res => {
         baseURL = res.url()
         loadPages(page);
         page.off('response', resHandler);
+        
     }
 }
 
 // puppeteer usage as normal
 puppeteer.launch({ headless: false, defaultViewport: null, args:['--start-maximized']}).then(async browser => {
+    _b = browser;
     page = await browser.newPage();
     await page.setViewport({width: 1920, height: 1080});
 
